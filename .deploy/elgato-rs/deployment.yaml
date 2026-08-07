@@ -1,0 +1,40 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: elgato-rs
+  name: elgato-rs
+  namespace: kj800x
+spec:
+  replicas: 1
+  revisionHistoryLimit: 1
+  selector:
+    matchLabels:
+      app: elgato-rs
+  template:
+    metadata:
+      labels:
+        app: elgato-rs
+    spec:
+      containers:
+        - command:
+            - elgato-rs
+          env:
+            - name: RUST_LOG
+              value: info
+            - name: ELGATO_HOST
+              value: "10.60.1.88"
+          image: ghcr.io/kj800x/elgato-rs:commit-$SHA
+          name: elgato-rs
+          ports:
+            - containerPort: 3000
+              protocol: TCP
+          livenessProbe:
+            httpGet:
+              path: /metrics
+              port: 3000
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          workingDir: /app
+      imagePullSecrets:
+        - name: ghcr-kj800x
